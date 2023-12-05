@@ -16,8 +16,8 @@ class Controller
                 'code' => $code
             ];
         }
-        echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         http_response_code($code);
+        echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
     public static function checkToken(array $requestData): bool
