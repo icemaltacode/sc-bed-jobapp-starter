@@ -30,8 +30,8 @@ RouteController::setEnvironment($twig);
 $router = new AltoRouter();
 /** View Routes ------------------------------------------------------------------------------- */
 $router->map('GET', '/', 'RouteController#viewListings', 'view_listings');
-$router->map('GET', '/login', ['c' => 'RouteController#viewLogin'], 'view_login');
-$router->map('GET', '/register', ['c' => 'RouteController#viewRegister'], 'view_register');
+$router->map('GET', '/login', 'RouteController#viewLogin', 'view_login');
+$router->map('GET', '/register', 'RouteController#viewRegister', 'view_register');
 $router->map('GET', '/listing/[i:id]', 'RouteController#viewListing', 'view_listing');
 $router->map('GET', '/account', 'RouteController#viewAccount', 'view_account');
 $router->map('GET', '/applications', 'RouteController#viewApplications', 'view_applications');
