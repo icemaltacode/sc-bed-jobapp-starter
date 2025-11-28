@@ -7,6 +7,9 @@ services:
       - ./src/api:/var/www/html
       - ./docker/conf/api.conf:/etc/nginx/conf.d/api.conf
       - ./docker/log:/var/log/nginx
+    depends_on:
+      - phpapi
+
   client:
     image: nginx:alpine
     ports:
@@ -15,20 +18,25 @@ services:
       - ./src/client:/var/www/html
       - ./docker/conf/client.conf:/etc/nginx/conf.d/client.conf
       - ./docker/log:/var/log/nginx
+    depends_on:
+      - phpclient
+
   phpapi:
-    build:
-      context: ./docker
+    image: ghcr.io/icemaltacode/sc-bed-php:latest
     volumes:
       - ./src/api:/var/www/html
-      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
   phpclient:
-    build:
-      context: ./docker
+    image: ghcr.io/icemaltacode/sc-bed-php:latest
     volumes:
       - ./src/client:/var/www/html
-      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
   mariadb:
     image: mariadb:latest
     ports:
@@ -36,7 +44,7 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: root
     healthcheck:
-      test: ["CMD", "mariadb-admin" , "-u", "root", '-proot', "ping", "-h", "localhost"]
+      test: ["CMD", "mariadb-admin" , "-u", "root", "-proot", "ping", "-h", "localhost"]
       start_period: 10s
       interval: 5s
       timeout: 3s
@@ -44,6 +52,7 @@ services:
     volumes:
       - ./support/db.sql:/docker-entrypoint-initdb.d/db.sql
       - db_data:/var/lib/mysql
+
   print-status:
     image: busybox
     command: "echo '---\nAPI: http://localhost:8000. CLIENT: http://localhost:8001. USE CTRL+C TO TERMINATE.\n---'"
@@ -54,5 +63,6 @@ services:
         condition: service_started
       mariadb:
         condition: service_healthy
+
 volumes:
-    db_data:
+  db_data:
